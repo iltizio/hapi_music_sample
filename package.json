@@ -1,0 +1,20 @@
+{
+  "name": "hapi_music_sample",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "test": "lab --assert code --colors -v",
+    "generateCoverage": "lab -r lcov > lcov.info"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "code": "^5.1.2",
+    "hapi": "^17.2.0",
+    "lab": "^15.2.0",
+    "mongoose": "^4.13.9",
+    "sinon": "^4.1.6"
+  }
+}

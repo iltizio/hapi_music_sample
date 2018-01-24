@@ -1,0 +1,6 @@
+{
+  "globalDependencies": {
+    "mongoose": "registry:dt/mongoose#4.7.0+20170322192047",
+    "sinon": "registry:dt/sinon#1.16.1+20161208163514"
+  }
+}
