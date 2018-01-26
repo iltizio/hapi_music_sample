@@ -43,6 +43,7 @@ lab.experiment('Testing Server Module', () => {
 
     lab.test('it starts up a server.', async () => {
         Code.expect(Server).to.exist();
+        Code.expect(Server.started).not.equal(0);
     });
 
     lab.test('GET /albums OK', async () => {
@@ -114,18 +115,25 @@ lab.experiment('Testing Server Module', () => {
             band: fakeAlbumList[0].band,
             year: fakeAlbumList[0].year
         };
-        var stub = Sinon.stub(Mongoose.Model, 'create').resolves(payload);
+
+        var fakeGeneratedId = "FAKEID";
+        var stub = Sinon.stub(Mongoose.Model, 'create')
+            .callsFake((albumData) => {
+                albumData._id = fakeGeneratedId
+            })
+            .resolves(payload);
 
         const response = await Server.inject({ method: 'POST', url: '/albums', payload: payload });
 
         var callStubArg = stub.getCall(0).args[0];
         Code.expect(callStubArg).to.equal(payload);
 
-        Code.expect(response.statusCode).to.equal(200);
+        Code.expect(response.statusCode).to.equal(201);
         Code.expect(response.result.message).not.be.null();
         Code.expect(response.result.message).to.equal('Album created successfully');
         Code.expect(response.result.album).not.be.null();
         Code.expect(response.result.album).to.equal(payload);
+        Code.expect(response.headers.location).to.equal('/albums/' + payload._id);
 
         Mongoose.Model.create.restore();
     });
@@ -169,7 +177,7 @@ lab.experiment('Testing Server Module', () => {
         };
         albumToUpdate.save = spy;
         var stub = Sinon.stub(Mongoose.Model, 'findById').resolves(albumToUpdate);
-        
+
         const response = await Server.inject({ method: 'PUT', url: '/albums/' + albumId, payload: payload });
 
         var callStubArg = stub.getCall(0).args[0];
@@ -192,9 +200,9 @@ lab.experiment('Testing Server Module', () => {
             band: fakeAlbumList[0].band,
             year: 2018
         };
-        
+
         var stub = Sinon.stub(Mongoose.Model, 'findById').resolves(null);
-        
+
         const response = await Server.inject({ method: 'PUT', url: '/albums/' + albumId, payload: payload });
 
         var callStubArg = stub.getCall(0).args[0];
@@ -216,9 +224,9 @@ lab.experiment('Testing Server Module', () => {
             band: fakeAlbumList[0].band,
             year: 2018
         };
-        
+
         var stub = Sinon.stub(Mongoose.Model, 'findById').rejects(fakeErr);
-        
+
         const response = await Server.inject({ method: 'PUT', url: '/albums/' + albumId, payload: payload });
 
         var callStubArg = stub.getCall(0).args[0];
@@ -243,7 +251,7 @@ lab.experiment('Testing Server Module', () => {
         };
         albumToDelete.remove = spy;
         var stub = Sinon.stub(Mongoose.Model, 'findById').resolves(albumToDelete);
-        
+
         const response = await Server.inject({ method: 'DELETE', url: '/albums/' + albumId });
 
         var callStubArg = stub.getCall(0).args[0];
@@ -260,7 +268,7 @@ lab.experiment('Testing Server Module', () => {
     lab.test('DELETE /albums/{id} NOT FOUND', async () => {
         var spy = Sinon.spy();
         Sinon.stub(Mongoose.Model, 'findById').resolves(null);
-        
+
         const response = await Server.inject({ method: 'DELETE', url: '/albums/123abc' });
         Code.expect(response.statusCode).to.equal(200);
         Code.expect(spy.called).to.equal(false);
@@ -273,7 +281,7 @@ lab.experiment('Testing Server Module', () => {
     lab.test('DELETE /albums/{id} KO', async () => {
         var spy = Sinon.spy();
         Sinon.stub(Mongoose.Model, 'findById').rejects(fakeErr);
-        
+
         const response = await Server.inject({ method: 'DELETE', url: '/albums/123abc' });
         Code.expect(response.statusCode).to.equal(200);
         Code.expect(spy.called).to.equal(false);

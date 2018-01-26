@@ -36,7 +36,8 @@ exports.create = (req, h) => {
     };
 
     return Album.create(albumData).then((album) => {
-        return { message: "Album created successfully", album: album };
+        //return { message: "Album created successfully", album: album };
+        return h.response({ message: "Album created successfully", album: album }).created('/albums/' + album._id);
     }).catch((err) => {
         return { err: err };
     });
