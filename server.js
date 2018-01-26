@@ -40,15 +40,6 @@ server.route({
   handler: AlbumController.remove
 });
 
-// (async () => {
-//   try {
-//     await server.register(Hoek);
-//   }
-//   catch (err) {
-//     console.log(err)
-//   }
-// })();
-
 (async () => {
   try {
     //await server.register({ plugin: require('vision') });
