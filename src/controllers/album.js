@@ -23,6 +23,18 @@ exports.get = (req, h) => {
     });
 }
 
+/**
+ * Get Albums by title
+ */
+exports.listByTitle = (req, h) => {
+    return Album.find({ 'title': new RegExp(req.params.title, "i") }).then((albums) => {
+        if (albums.length == 0) return { message: 'No Album Found' };
+        return { albums: albums };
+    }).catch((err) => {
+        return { err: err };
+    });
+}
+
 
 /**
  * POST an Album

@@ -22,6 +22,13 @@ server.route({
   path: '/albums/{id}',
   handler: AlbumController.get
 });
+
+server.route({
+  method: 'GET',
+  path: '/albums/title/{title}',
+  handler: AlbumController.listByTitle
+});
+
 server.route({
   method: 'POST',
   path: '/albums',

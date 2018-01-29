@@ -108,6 +108,57 @@ lab.experiment('Testing Server Module', () => {
         Mongoose.Model.findById.restore();
     });
 
+    lab.test('GET /albums/title/{title}', async () => {
+        var albumTitle = 'searchTitle';
+        var stub = Sinon.stub(Mongoose.Model, 'find').resolves(fakeAlbumList);
+
+        const response = await Server.inject({ method: 'GET', url: '/albums/title/' + albumTitle });
+
+        var callStubArg = stub.getCall(0).args[0];
+        Code.expect(callStubArg).to.equal({ 'title': new RegExp(albumTitle, "i") });
+
+        Code.expect(response.statusCode).to.equal(200);
+        Code.expect(response.result.albums).not.be.null();
+        Code.expect(response.result.albums).to.be.array();
+        Code.expect(response.result.albums.length).to.equal(fakeAlbumList.length);
+        Code.expect(response.result.albums).to.equal(fakeAlbumList);
+
+        Mongoose.Model.find.restore();
+    });
+
+    lab.test('GET /albums/title/{title} NO ALBUM', async () => {
+        var albumTitle = 'searchTitle';
+        var stub = Sinon.stub(Mongoose.Model, 'find').resolves([]);
+
+        const response = await Server.inject({ method: 'GET', url: '/albums/title/' + albumTitle });
+
+        var callStubArg = stub.getCall(0).args[0];
+        Code.expect(callStubArg).to.equal({ 'title': new RegExp(albumTitle, "i") });
+
+        Code.expect(response.statusCode).to.equal(200);
+        Code.expect(response.result.albums).to.be.undefined();
+        Code.expect(response.result.message).to.equal('No Album Found');
+
+        Mongoose.Model.find.restore();
+    });
+
+    lab.test('GET /albums/title/{title} KO', async () => {
+        var albumTitle = 'searchTitle';
+        var stub = Sinon.stub(Mongoose.Model, 'find').rejects(fakeErr);
+
+        const response = await Server.inject({ method: 'GET', url: '/albums/title/' + albumTitle });
+
+        var callStubArg = stub.getCall(0).args[0];
+        Code.expect(callStubArg).to.equal({ 'title': new RegExp(albumTitle, "i") });
+
+        Code.expect(response.statusCode).to.equal(200);
+        Code.expect(response.result.albums).to.be.undefined();
+        Code.expect(response.result.err).not.be.null();
+        Code.expect(response.result.err).to.equal(fakeErr);
+
+        Mongoose.Model.find.restore();
+    });
+
     lab.test('POST /albums OK', async () => {
         var payload = {
             title: fakeAlbumList[0].title,
